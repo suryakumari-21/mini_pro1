@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stress Level Analysis</title>
+    <style>
+        body {
+            background-image: url('https://assets.onecompiler.app/4343x34xt/4343wcn9v/project.jpg');
+            background-size: cover;
+            background-position: center;
+            margin: 0;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            color: white;
+        }
+        .container {
+            text-align: center;
+            padding-top: 50px;
+        }
+        h1 {
+            font-size: 3em;
+            color: white;
+            margin: 0;
+            padding: 20px;
+            font-weight: bold;
+        }
+        p {
+            font-size: 1.5em;
+            margin: 20px 0;
+            color: white;
+        }
+        .start-button {
+            font-size: 1.2em;
+            padding: 15px 30px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .start-button:hover {
+            background-color: #45a049;
+        }
+        .question-container {
+            display: none;
+            margin-top: 20px;
+        }
+        .question {
+            font-size: 1.5em;
+            font-weight: normal;
+            margin: 20px 0;
+        }
+        .answer-buttons {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .answer-button {
+            padding: 15px 30px;
+            margin: 0 15px;
+            font-size: 1.5em;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .answer-button:hover {
+            background-color: #1976D2;
+        }
+        .thank-you-message {
+            font-size: 1.8em;
+            margin-top: 30px;
+            display: none;
+        }
+        .suggestion-message {
+            font-size: 1.5em;
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to Stress Level Analysis</h1>
+        <p>Are you ready to start?</p>
+        <button class="start-button" onclick="startQuiz()">Start</button>
+        
+        <div class="question-container" id="question-container">
+            <div class="question" id="question"></div>
+            <div class="answer-buttons">
+                <button class="answer-button" onclick="nextQuestion('Yes')">Yes</button>
+                <button class="answer-button" onclick="nextQuestion('No')">No</button>
+            </div>
+        </div>
+
+        <div class="thank-you-message" id="thank-you-message">
+            Thank you for completing the quiz! Your responses will help us understand your stress levels.
+        </div>
+
+        <div class="suggestion-message" id="suggestion-message">
+            <p id="suggestion-text"></p>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            "Do you often feel anxiety?",
+            "Do you feel unworthy at times?",
+            "Do you feel tired or fatigued often?",
+            "Do you feel a constant sense of sadness and loss of interest?",
+            "Are you suffering from frequent headaches?",
+            "Do you have abnormal blood pressure?",
+            "Do you have any sleep disturbances?",
+            "Do you have any breathing issues?",
+            "Does noise level contribute to your stress?",
+            "Do living conditions affect you?"
+        ];
+
+        let currentQuestionIndex = 0;
+        let responses = [];
+
+        function startQuiz() {
+            document.querySelector('.start-button').style.display = 'none';
+            document.querySelector('p').style.display = 'none';
+            document.querySelector('.question-container').style.display = 'block';
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            if (currentQuestionIndex < questions.length) {
+                document.getElementById('question').innerText = questions[currentQuestionIndex];
+            } else {
+                endQuiz();
+            }
+        }
+
+        function nextQuestion(answer) {
+            responses.push(answer === 'Yes' ? 1 : 0);
+            currentQuestionIndex++;
+            displayQuestion();
+        }
+
+        function endQuiz() {
+            document.getElementById('question').style.display = 'none';
+            document.querySelector('.answer-buttons').style.display = 'none';
+            document.getElementById('thank-you-message').style.display = 'block';
+            sendResponses();
+        }
+
+        function sendResponses() {
+            fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ responses })
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayStressLevel(data.stress_level);
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function displayStressLevel(stressLevel) {
+            document.getElementById('suggestion-text').innerHTML = stressLevel;
+            document.getElementById('suggestion-message').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
